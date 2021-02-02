@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新接龍free cell</title>
+    <link rel="stylesheet" href="//at.alicdn.com/t/font_2347922_i2em6s1t79l.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/10.14.0/sweetalert2.css"
+        integrity="sha512-tAB44Mx++ci+FGvwu3N7f1RSXeN2s+M+pbJHHbYOmkla05H3zV0Y/LFVtwFAPU92HQcLj6SRHS925pcBBxJ4XQ=="
+        crossorigin="anonymous" />
+    <link rel="stylesheet" href="./all.css">
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="nav">
+            <div class="time">00:00</div>
+            <button class="newGame">NEW</button>
+            <button class="iconfont icon-back3 prev"></button>
+        </div>
+        <div class="cellsArea">
+            <div id="freeCell1" class="cells freeCell"></div>
+            <div id="freeCell2" class="cells freeCell"></div>
+            <div id="freeCell3" class="cells freeCell"></div>
+            <div id="freeCell4" class="cells freeCell"></div>
+            <div id="spades_0" class="cells homeCell">
+                <i class="iconfont icon-l icon-spades"></i>
+            </div>
+            <div id="heart_0" class="cells homeCell">
+                <i class="iconfont icon-l icon-heart"></i>
+            </div>
+            <div id="diamonds_0" class="cells homeCell">
+                <i class="iconfont icon-l icon-diamonds"></i>
+            </div>
+            <div id="clubs_0" class="cells homeCell">
+                <i class="iconfont icon-l icon-clubs"></i>
+            </div>
+        </div>
+        <div class="tableau">
+            <div id="area1" class="cardArea">
+            </div>
+            <div id="area2" class="cardArea"></div>
+            <div id="area3" class="cardArea"></div>
+            <div id="area4" class="cardArea"></div>
+            <div id="area5" class="cardArea"></div>
+            <div id="area6" class="cardArea"></div>
+            <div id="area7" class="cardArea"></div>
+            <div id="area8" class="cardArea"></div>
+        </div>
+
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js'></script>
+    <script src="./all.js"></script>
+
+
+</body>
+
+</html>
