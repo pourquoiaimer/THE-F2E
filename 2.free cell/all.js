@@ -4,6 +4,10 @@ let min = 0;
 let sec = 0;
 let allSuits = ['spades', 'heart', 'diamonds', 'clubs'];
 let test;
+let dataId;
+let fromId;
+let moveToId;
+let fromTop;
 // { number: 1, suits: "spades", color: "black" }
 
 
@@ -114,21 +118,23 @@ function registeredCardArea() {
     $('.cardArea').on('dragover', function (e) {
         e.preventDefault()
     })
-    $('.card').on('dragover', function (e) {
-        e.preventDefault()
-    })
+    $('.cardArea').off('drop')
     $('.cardArea').on('drop', function (e) {
         e.preventDefault();
         let len;
-        let dataId = e.originalEvent.dataTransfer.getData('text'); //抓起來的元素id
+        dataId = e.originalEvent.dataTransfer.getData('text'); //抓起來的元素id
+        fromId = $(`#${dataId}`).parent()[0].id //從哪裡來
+        fromTop = $(`#${dataId}`).css('top')
         let dataSuits = dataId.split('_')[0]  //抓起來的花色
         let dataNum = parseInt(dataId.split('_')[1]) //抓起來的數字
         let eId = e.target.id; //丟到的卡牌
         switch (true) {//基本上讓獲取的eId都會是該行的最後一個
             case $(`#${eId}`).children().length == 0: //這是該行已經沒牌的狀況
                 len = 0;
+                moveToId = e.target.id
                 appendCard(e.target, dataId)
                 $(`#${dataId}`).css('top', "")
+                rememberMove(dataId, fromId, moveToId, fromTop)
                 registerDraggable()
                 return
             case eId.indexOf('area') < 0: //當不是放到area上
@@ -147,8 +153,10 @@ function registeredCardArea() {
             len = $(`#${eFatherId}`).children().length || 0;
             if (e.target.id.indexOf('area') < 0) {
                 appendCard(e.target.parentNode, dataId)
+                moveToId = e.target.parentNode.id
             } else {
                 appendCard(e.target, dataId)
+                moveToId = e.target.id
             }
             $(`#${dataId}`).css('top', `${len * 50}px`)
         }
@@ -168,25 +176,21 @@ function registeredCardArea() {
                 }
             }
         }
+        rememberMove(dataId, fromId, moveToId, fromTop)
         registerDraggable()
     })
 }
 function registeredCard() { //各種關於card的行為的註冊 基本上e.target代表被丟到的位置，data抓的都是被丟的元素
+    $('.card').off('dragstart')
+    $('.card').off('dragend')
+    $('.card').off('dblclick')
+    $('.card').on('dragover', function (e) {
+        e.preventDefault()
+    })
     $('.card').on('dragstart', function (e) {
         $(e.target).css('opacity', "0.1")
         let parentId = e.target.parentNode.id //得出現在所在位置
         e.originalEvent.dataTransfer.setData("Text", e.target.id);
-        if ($(e.target).parent().hasClass('freeCell')) {
-            $(e.target).parent().on('drop', function (e) {
-                e.preventDefault();
-                var data = e.originalEvent.dataTransfer.getData("Text"); //抓起來的元素id;
-                e.target.appendChild(document.getElementById(data));
-                $(e.target).off('drop')
-                if (e.target.className.indexOf('cells') == 0) {
-                    $(`#${data}`).css({ 'top': 0, 'position': 'static' })
-                }
-            })
-        }
     })
     $('.card').on('dragend', function (e) {
         $(e.target).css('opacity', "1")
@@ -196,16 +200,20 @@ function registeredCard() { //各種關於card的行為的註冊 基本上e.targ
             $(e.target).nextAll().length != 0) { //或不是最後一個時
             return
         }
-        console.log($(e.target).nextAll().length);
-        let eId = e.target.id //雙擊對象的id
-        let eSuits = eId.split('_')[0]  //雙擊的花色
-        let eNum = parseInt(eId.split('_')[1]) //雙擊的數字
+        dataId = e.target.id //雙擊對象的id
+        fromId = $(`#${dataId}`).parent()[0].id
+        fromTop = $(`#${dataId}`).css('top')
+        let eSuits = dataId.split('_')[0]  //雙擊的花色
+        let eNum = parseInt(dataId.split('_')[1]) //雙擊的數字
         let homeNowNum = $(`#${eSuits}_0`).children().length //目標花色現在的數字
 
         if (eNum == homeNowNum) {
-            document.querySelector(`#${eSuits}_0`).appendChild(document.getElementById(eId));
-            $(`#${eId}`).css({ 'top': '', 'position': 'absolute' })
+            document.querySelector(`#${eSuits}_0`).appendChild(document.getElementById(dataId));
+            $(`#${dataId}`).css({ 'top': '', 'position': 'absolute' })
         }
+
+        moveToId = `${eSuits}_0`
+        rememberMove(dataId, fromId, moveToId, fromTop)
         registerDraggable()
         registerFreeCells()
         checkWin()
@@ -213,6 +221,10 @@ function registeredCard() { //各種關於card的行為的註冊 基本上e.targ
 }
 
 function registerFreeCells() { // 註冊freeCell欄位的拖曳事件
+    $('.freeCell').off('dragenter')
+    $('.freeCell').off('dragleave')
+    $('.freeCell').off('drop')
+
     $('.freeCell').on('dragenter', function (e) { //拖曳到上面時的特效
         let eClass = e.target.className;
         if (eClass.indexOf('freeCell') <= 0) {
@@ -231,7 +243,9 @@ function registerFreeCells() { // 註冊freeCell欄位的拖曳事件
     })
     $('.freeCell').on('drop', function (e) {
         e.preventDefault();
-        let dataId = e.originalEvent.dataTransfer.getData('text'); //抓起來的元素id
+        dataId = e.originalEvent.dataTransfer.getData('text'); //抓起來的元素id
+        fromId = $(`#${dataId}`).parent()[0].id
+        fromTop = $(`#${dataId}`).css('top')
         let eClass = e.target.className;
         switch (true) {
             case eClass.indexOf('freeCell') <= 0:
@@ -245,14 +259,20 @@ function registerFreeCells() { // 註冊freeCell欄位的拖曳事件
         }
         $(e.target).css('border', '5px double white')
         e.target.appendChild(document.getElementById(dataId));
-        $(e.target).off('drop')
+        moveToId = e.target.id
+        // $(e.target).off('drop')
         if (e.target.className.indexOf('cells') == 0) {
             $(`#${dataId}`).css({ 'top': '', 'position': 'absolute' })
         }
+        rememberMove(dataId, fromId, moveToId, fromTop)
         registerDraggable()
     })
 }
 function registerHomeCells() {//針對homeCell的拖曳設定註冊
+    $('.homeCell').off('dragenter')
+    $('.homeCell').off('dragleave')
+    $('.homeCell').off('drop')
+
     $('.homeCell').on('dragenter', function (e) { //拖曳到上面時的特效
         if (e.target.id.split('_')[1] != 0) {
             $(e.target).parent().css('border', '5px double yellow')
@@ -271,13 +291,14 @@ function registerHomeCells() {//針對homeCell的拖曳設定註冊
 
     $('.homeCell').on('drop', function (e) {  //放下時觸發的事件 //TODO:還要考慮如果之後實做可以一次拿起多張時的拒絕狀況，加在下面if return那一塊
         e.preventDefault();
-        console.log(e.originalEvent.dataTransfer);
         let eId = e.target.id //丟下位置的id
         let nowSuits = eId.split('_')[0]  //現在上面的花色
         let nowNum = parseInt(eId.split('_')[1]) //現在上面的數字
-        let dataId = e.originalEvent.dataTransfer.getData('text'); //抓起來的元素id
+        dataId = e.originalEvent.dataTransfer.getData('text'); //抓起來的元素id
         let dataSuits = dataId.split('_')[0]  //抓起來的花色
         let dataNowNum = parseInt(dataId.split('_')[1]) //抓起來的數字f
+        fromId = $(`#${dataId}`).parent()[0].id
+        fromTop = $(`#${dataId}`).css('top')
         if (eId == dataId || //拿起來又放下的時候
             dataSuits !== nowSuits || //花色不對的時候
             dataNowNum != nowNum + 1 || //數字不對的時候
@@ -296,11 +317,17 @@ function registerHomeCells() {//針對homeCell的拖曳設定註冊
             //當裡面有牌時
             $(e.target).parent().css('border', '5px double white')
             e.target.parentNode.appendChild(document.getElementById(dataId));
+            moveToId = e.target.parentNode.id
         } else {
             //當裡面還沒有牌時
             $(e.target).css('border', '5px double white')
+            let item = dataId
+            moveToId = e.target.id
             e.target.appendChild(document.getElementById(dataId))
+
+            //TODO:基本上跟之前寫BMI時一樣，就是每次都取出然後再加在前面再填入，然後點上一步的時候就是取出然後執行最後一步然後再刪去，統整一下各個位置的移動行為函式？
         }
+        rememberMove(dataId, fromId, moveToId, fromTop)
         registerDraggable()
         checkWin()
     })
@@ -363,6 +390,32 @@ function restratAlert() {
     })
 }
 
+//記住移動的步數
+function rememberMove(item, fromWhere, goWhere, fromTop) {
+    let data = JSON.parse(sessionStorage.getItem('move')) || []
+    let saveData = { 'moveItem': item, 'comeFrom': fromWhere, 'moveTo': goWhere, 'top': fromTop }
+    data.push(saveData)
+    sessionStorage.setItem('move', JSON.stringify(data));
+}
+function undo() { //註冊回復上一步的動作
+    $('#undo').on('click', function () {
+        let moveData = JSON.parse(sessionStorage.getItem('move'))
+        if (moveData == null || moveData == '') {
+            console.log('no move to undo');
+            return
+        }
+        let len = moveData.length
+        let undoData = moveData[len - 1]
+        let undoItem = undoData.moveItem
+        let undoMoveTo = undoData.comeFrom
+        let undocomeFrom = undoData.moveTo
+        let undoTop = undoData.top
+        document.querySelector(`#${undoMoveTo}`).appendChild(document.getElementById(undoItem));
+        $(`#${undoItem}`).css('top', undoTop)
+        moveData.pop()
+        sessionStorage.setItem('move', JSON.stringify(moveData));
+    })
+}
 
 function iRWinner() { //測試勝利用
     for (let i = 0; i < 4; i++) {
@@ -399,6 +452,8 @@ function init() {
     $('.cells').on('dragover', function (e) { //確保不會一直觸發事件導致損耗效能
         e.preventDefault();
     })
+    sessionStorage.removeItem('move');
+    undo()
 }
 init();
 setInterval(() => {
