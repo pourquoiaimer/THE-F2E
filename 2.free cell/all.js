@@ -414,8 +414,6 @@ function undo() { //註冊回復上一步的動作
         let undocomeFrom = undoData.moveTo
         let undoTop = undoData.top
         if (Array.isArray(undoItem)) {
-            console.log('test');
-            console.log(undoItem.length);
             for (let i = 0; i < undoItem.length; i++) {
                 document.querySelector(`#${undoMoveTo}`).appendChild(document.getElementById(undoItem[i]));
                 $(`#${undoItem[i]}`).css('top', undoTop[i])
