@@ -3,7 +3,6 @@ let areaData = [];
 let min = 0;
 let sec = 0;
 let allSuits = ['spades', 'heart', 'diamonds', 'clubs'];
-let test;
 let dataId;
 let fromId;
 let moveToId;
@@ -134,7 +133,6 @@ function registeredCardArea() {
                 moveToId = e.target.id
                 appendCard(e.target, dataId)
                 $(`#${dataId}`).css('top', "")
-                rememberMove(dataId, fromId, moveToId, fromTop)
                 registerDraggable()
                 return
             case eId.indexOf('area') < 0: //當不是放到area上
@@ -152,31 +150,37 @@ function registeredCardArea() {
         if (eColor != dataColor && dataNum == eNum - 1) {
             len = $(`#${eFatherId}`).children().length || 0;
             if (e.target.id.indexOf('area') < 0) {
-                appendCard(e.target.parentNode, dataId)
                 moveToId = e.target.parentNode.id
+                appendCard(e.target.parentNode, dataId)
+
             } else {
-                appendCard(e.target, dataId)
                 moveToId = e.target.id
+                appendCard(e.target, dataId)
             }
             $(`#${dataId}`).css('top', `${len * 50}px`)
         }
         function appendCard(dropArea, dataId) { //移動卡牌的動作
             let dataLen = $(`#${dataId}`).nextAll().length
             if (dataLen == 0) { //代表只有一張
+                rememberMove(dataId, fromId, moveToId, fromTop)
                 dropArea.appendChild(document.getElementById(dataId))
                 $(`#${dataId}`).css('top', `${len * 50}px`)
             } else {//代表拖曳不只一張
                 let cardId;
+                let idArr = []
+                let topArr = []
                 let arr = $(`#${dataId}`).nextAll().addBack()
-                test = $(`#${dataId}`).nextAll().addBack()
                 for (let i = 0; i <= dataLen; i++) {
                     cardId = arr[i].id;
+                    fromTop = $(`#${cardId}`).css('top')
                     dropArea.appendChild(document.getElementById(cardId))
                     $(`#${cardId}`).css('top', `${(len + i) * 50}px`)
+                    idArr.push(cardId)
+                    topArr.push(fromTop)
                 }
+                rememberMove(idArr, fromId, moveToId, topArr)
             }
         }
-        rememberMove(dataId, fromId, moveToId, fromTop)
         registerDraggable()
     })
 }
@@ -272,7 +276,6 @@ function registerHomeCells() {//針對homeCell的拖曳設定註冊
     $('.homeCell').off('dragenter')
     $('.homeCell').off('dragleave')
     $('.homeCell').off('drop')
-
     $('.homeCell').on('dragenter', function (e) { //拖曳到上面時的特效
         if (e.target.id.split('_')[1] != 0) {
             $(e.target).parent().css('border', '5px double yellow')
@@ -410,8 +413,17 @@ function undo() { //註冊回復上一步的動作
         let undoMoveTo = undoData.comeFrom
         let undocomeFrom = undoData.moveTo
         let undoTop = undoData.top
-        document.querySelector(`#${undoMoveTo}`).appendChild(document.getElementById(undoItem));
-        $(`#${undoItem}`).css('top', undoTop)
+        if (Array.isArray(undoItem)) {
+            console.log('test');
+            console.log(undoItem.length);
+            for (let i = 0; i < undoItem.length; i++) {
+                document.querySelector(`#${undoMoveTo}`).appendChild(document.getElementById(undoItem[i]));
+                $(`#${undoItem[i]}`).css('top', undoTop[i])
+            }
+        } else {
+            document.querySelector(`#${undoMoveTo}`).appendChild(document.getElementById(undoItem));
+            $(`#${undoItem}`).css('top', undoTop)
+        }
         moveData.pop()
         sessionStorage.setItem('move', JSON.stringify(moveData));
     })
