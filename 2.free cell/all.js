@@ -84,7 +84,7 @@ function time() {
 }
 
 //分別寫註冊物件的動作
-function registerDraggable() {// 根據牌的位置決定是否開啟draggable，但是關閉由丟下的時候再來調整
+function registerDraggable() {// 根據牌的位置及狀態決定是否開啟draggable
     for (let i = 0; i < 4; i++) {
         for (let j = 1; j <= 13; j++) {
             if ($(`#${allSuits[i]}_${j}`).nextAll().length == 0) { //判斷是否是最後一個
@@ -291,7 +291,6 @@ function registerHomeCells() {//針對homeCell的拖曳設定註冊
             $(e.target).css('border', '5px double white')
         }
     })
-
     $('.homeCell').on('drop', function (e) {  //放下時觸發的事件 //TODO:還要考慮如果之後實做可以一次拿起多張時的拒絕狀況，加在下面if return那一塊
         e.preventDefault();
         let eId = e.target.id //丟下位置的id
